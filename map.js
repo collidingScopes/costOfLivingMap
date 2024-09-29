@@ -2,6 +2,7 @@
 Adjust colour scale (stark contrast depending on whether the index is <100 or >100; rounded numbers / pre-chosen values?)
 Allow user to choose benchmark country and adjust all indices based on that benchmark
 Add feature where the user can "query" and get back a table of data (countries with higher income than x, countries with lower COL than y, etc...)
+Mobile hover / click on leaflet map not working
 Add ranked table below
 Table / feature to compare two countries side-by-side
 Remove world map tiling (there is blank data once you leave original map)
@@ -317,6 +318,7 @@ function onEachFeature(feature, layer) {
   layer.on({
       mouseover: highlightFeature,
       mouseout: resetHighlight,
+      click: highlightFeature,
   });
 
 }
