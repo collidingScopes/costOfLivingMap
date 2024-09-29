@@ -2,7 +2,7 @@
 Adjust colour scale (stark contrast depending on whether the index is <100 or >100; rounded numbers / pre-chosen values?)
 Allow user to choose benchmark country and adjust all indices based on that benchmark
 Add feature where the user can "query" and get back a table of data (countries with higher income than x, countries with lower COL than y, etc...)
-Mobile hover / click on leaflet map not working
+On mobile, unclicking does not result in style reset (pink border remains around old clicks)
 Add ranked table below
 Table / feature to compare two countries side-by-side
 Remove world map tiling (there is blank data once you leave original map)
@@ -276,7 +276,7 @@ function highlightFeature(e) {
   
   var layer = e.target;
 
-  if(layer.feature.properties.costIndex != undefined){
+  if(layer.feature.properties.costIndex != undefined && !isIOS && !isAndroid){
     layer.setStyle({
       weight: 4,
       color: '#e7037c',
@@ -285,6 +285,7 @@ function highlightFeature(e) {
   }
 
   /*
+  Popup upon hover
   var popup = L.popup()
     .setLatLng(e.latlng)
     .setContent(`
@@ -302,7 +303,6 @@ function highlightFeature(e) {
 
   `);
   
-
   layer.bringToFront();
   info.update(layer.feature.properties);
 
@@ -319,7 +319,6 @@ function onEachFeature(feature, layer) {
       mouseover: highlightFeature,
       mouseout: resetHighlight,
       click: highlightFeature,
-      unclick: resetHighlight,
   });
 
 }
@@ -345,3 +344,23 @@ function removeMap(){
     map.remove();
   }
 }
+
+//detect user browser
+var ua = navigator.userAgent;
+var isSafari = false;
+var isFirefox = false;
+var isIOS = false;
+var isAndroid = false;
+if(ua.includes("Safari")){
+    isSafari = true;
+}
+if(ua.includes("Firefox")){
+    isFirefox = true;
+}
+if(ua.includes("iPhone") || ua.includes("iPad") || ua.includes("iPod")){
+    isIOS = true;
+}
+if(ua.includes("Android")){
+    isAndroid = true;
+}
+console.log("isSafari: "+isSafari+", isFirefox: "+isFirefox+", isIOS: "+isIOS+", isAndroid: "+isAndroid);
