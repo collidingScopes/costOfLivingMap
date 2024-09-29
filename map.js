@@ -319,6 +319,7 @@ function onEachFeature(feature, layer) {
       mouseover: highlightFeature,
       mouseout: resetHighlight,
       click: highlightFeature,
+      unclick: resetHighlight,
   });
 
 }
