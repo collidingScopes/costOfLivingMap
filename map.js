@@ -3,9 +3,9 @@ To-do:
 Allow user to choose benchmark country and adjust all indices based on that benchmark
 Add feature where the user can "query" and get back a table of data (countries with higher income than x, countries with lower COL than y, etc...)
 Mobile formatting (smaller text size, etc.)
+Wrap text / smaller text on map info + legend
 Remove world map tiling (there is blank data once you leave original map)
 For full data table, add up+down arrow indicator to show that the column header can be clicked to be sorted
-Add scatter-plot chart to highlight outliers (above and below the slope=1 line)
 Right-align the table data for readability
 Add every other row shading to full data table
 Add light shade fill for full data table when hovering on a row
@@ -80,20 +80,20 @@ function createMap() {
   // Add a base map layer
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 7,
-    minZoom: 2,
+    minZoom: 1,
     attribution: '© OpenStreetMap',
   }).addTo(map);
 
   let title;
   let metricName;
   if(selectedMetric == "Cost of Living"){
-    title = "Cost of Living Index (U.S.A. = 100)";
+    title = `Cost of Living Index<br>(U.S.A. = 100)`;
     metricName = "costIndex";
   } else if(selectedMetric == "Income"){
-    title = "Income Index (U.S.A. = 100)";
+    title = `Income Index<br>(U.S.A. = 100)`;
     metricName = "incomeIndex";
   } else if(selectedMetric == "Purchasing Power"){
-    title = "Purchasing Power Index (U.S.A. = 100)";
+    title = `Purchasing Power Index<br>(U.S.A. = 100)`;
     metricName = "PPI";
   }
 
@@ -122,7 +122,7 @@ function createMap() {
   // method that we will use to update the control based on feature properties passed
   info.update = function (props) {
       this._div.innerHTML = '<h4>'+title+'</h4>' +  (props ?
-          '<b>' + props.ADMIN + '</b><br />' + numberFormatting(eval("props."+metricName))
+          props.ADMIN + '<br />' + numberFormatting(eval("props."+metricName))
           : 'Hover over a country');
   };
   info.addTo(map);
@@ -221,7 +221,7 @@ function addLegend(title, maxValue){
   legend.onAdd = function(map) {
     let div = L.DomUtil.create('div', 'info legend');
   
-    div.innerHTML = '<div><b>'+title+'</b></div>';    
+    div.innerHTML = '<div>'+title+'</div>';    
     for (let i = 0; i < numSteps; i++) {
       div.innerHTML += `<i style="background:${colorScale(i*step)}"></i>${numberFormatting(i*step)}<br>`;
     }
@@ -263,7 +263,7 @@ function createDataTable(){
   // Create table header
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
-  ['Country', 'Cost of Living Index', 'Income Index', 'Purchasing Power Index'].forEach(headerText => {
+  ['Country', 'Cost of Living Index', 'Income Index', 'Purchasing Power Index', 'Region', 'Population'].forEach(headerText => {
     const th = document.createElement('th');
     th.textContent = headerText;
     headerRow.appendChild(th);
@@ -287,12 +287,20 @@ function createDataTable(){
 
     const PPICell = document.createElement('td');
     PPICell.textContent = item.PPI;
+    
+    const regionCell = document.createElement('td');
+    regionCell.textContent = item.region;
+
+    const populationCell = document.createElement('td');
+    populationCell.textContent = Number(item.population).toLocaleString();
 
     row.appendChild(countryCell);
     row.appendChild(costIndexCell);
     row.appendChild(incomeIndexCell);
     row.appendChild(PPICell);
-    
+    row.appendChild(regionCell);
+    row.appendChild(populationCell);
+
     tbody.appendChild(row);
   });
   table.appendChild(tbody);
@@ -438,7 +446,7 @@ function createScatterplot(){
       .range([0, width]);
 
     const y = d3.scaleLinear()
-      .domain([0, 150])
+      .domain([0, 170])
       .range([height, 0]);
 
     const size = d3.scaleLinear()
@@ -577,7 +585,7 @@ function createScatterplot(){
 
     svg.append("text")
       .attr("x", width-100)
-      .attr("y", 20)
+      .attr("y", height-30)
       .attr("text-anchor", "start")
       .style("font-size", "12px")
       .style("font-weight","bold")
