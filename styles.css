@@ -154,3 +154,17 @@ table.sortable thead {
 .selectB {
   color: rgb(11, 182, 194);
 }
+
+#scatterplot {
+  background-color: rgb(255, 252, 244);
+}
+
+.legendBox {
+  fill: rgb(255, 252, 244);
+  opacity: 0.3;
+}
+
+.legendLabel {
+  color: black;
+  font-size: 1em;
+}

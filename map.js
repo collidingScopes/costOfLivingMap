@@ -411,8 +411,8 @@ function createScatterplot(){
   csvData.sort((a, b) => b.population - a.population);
 
   // Set up the dimensions and margins of the graph
-  const margin = {top: 45, right: 45, bottom: 45, left: 45};
-  const width = window.innerWidth - margin.left - margin.right;
+  const margin = {top: 45, right: 10, bottom: 45, left: 45};
+  const width = window.innerWidth*0.95 - margin.left - margin.right;
   const height = Math.min(window.innerHeight*0.8, width) - margin.top - margin.bottom;
 
   // Create SVG element
@@ -444,7 +444,7 @@ function createScatterplot(){
     const size = d3.scaleLinear()
       //.domain([0, d3.max(data, d => d.population)])
       .domain([0,1200000000])
-      .range([4, 40]);  // Adjust min and max circle sizes as needed
+      .range([6, 40]);  // Adjust min and max circle sizes as needed
 
     // Add X gridlines
     svg.append("g")
@@ -498,8 +498,36 @@ function createScatterplot(){
       .style("font-size","14px")
       .text("Income Index");
     
+    // Handmade legend
+
+    let regionLabels = [
+      "North America", "Central America / Carribean",
+      "South America","Europe",
+      "Middle East","Africa",
+      "Asia","Oceania",
+    ];
+    let regionColors = 
+    [
+      "hsl(0,90%,50%)","hsl(45,90%,50%)",
+      "hsl(90,90%,50%)","hsl(135,90%,50%)",
+      "hsl(180,90%,50%)","hsl(225,90%,50%)",
+      "hsl(270,90%,50%)","hsl(315,90%,50%)",
+    ];
+
+    svg.append('rect')
+        .attr('x', 15)
+        .attr('y', 15)
+        .attr('width', 190)
+        .attr('height', 135)
+        .attr('class', 'legendBox')
+
+    for(i=0; i<regionLabels.length; i++){
+      svg.append("circle").attr("cx",30).attr("cy",30+15*i).attr("r", 6).style("fill", regionColors[i]);
+      svg.append("text").attr("x", 40).attr("y", 32+15*i).text(regionLabels[i]).style("font-size", "12px").attr("alignment-baseline","middle").attr("class","legendLabel");
+    }
+
     // Add dots
-    svg.selectAll("circle")
+    svg.selectAll(".activeCircle")
       .data(data)
       .enter()
       .append("circle")
@@ -508,25 +536,22 @@ function createScatterplot(){
         .attr("r", d => size(d.population))
         //.style("fill", "#69b3a2")
         .style("fill",function(d){
-          let selectedColor =
-          (d.region == "North America") ? "hsl(0,90%,50%)" :
-          (d.region == "Central America / Carribean") ? "hsl(40,90%,50%)" :
-          (d.region == "South America") ? "hsl(80,90%,50%)" :
-          (d.region == "Europe") ? "hsl(120,90%,50%)" :
-          (d.region == "Middle East") ? "hsl(160,90%,50%)" :
-          (d.region == "Africa") ? "hsl(200,90%,50%)" :
-          (d.region == "Asia") ? "hsl(240,90%,50%)" :
-          (d.region == "Oceania") ? "hsl(280,90%,50%)" :
+          let selectedColor = 
+          (d.region == regionLabels[0]) ? regionColors[0] :
+          (d.region == regionLabels[1]) ? regionColors[1] :
+          (d.region == regionLabels[2]) ? regionColors[2] :
+          (d.region == regionLabels[3]) ? regionColors[3] :
+          (d.region == regionLabels[4]) ? regionColors[4] :
+          (d.region == regionLabels[5]) ? regionColors[5] :
+          (d.region == regionLabels[6]) ? regionColors[6] :
+          (d.region == regionLabels[7]) ? regionColors[7] :
           "black";
 
           return selectedColor;
         })
-        .style("opacity", 0.7)
+        .style("opacity", 0.85)
         .attr("stroke", "black")
-
-    function chooseCircleColor(d){
-
-    }
+        .attr("class","activeCircle");
 
     // Calculate linear regression
     const regression = d3.regressionLinear()
@@ -541,7 +566,8 @@ function createScatterplot(){
       .attr("y1", y(regressionLine[0][1]))
       .attr("x2", x(regressionLine[1][0]))
       .attr("y2", y(regressionLine[1][1]))
-      .attr("stroke", "#e7037c")
+      .attr("stroke", "black")
+      .attr("stroke-dasharray", "2,2")
       .attr("stroke-width", 2);
 
     // Add regression formula
@@ -555,7 +581,7 @@ function createScatterplot(){
       .attr("text-anchor", "start")
       .style("font-size", "12px")
       .style("font-weight","bold")
-      .style("fill", "#e7037c")
+      .style("fill", "black")
       .text(`y = ${slope}x + ${intercept}`)
       .append("tspan")
       .attr("x", width-100)
@@ -573,7 +599,7 @@ function createScatterplot(){
       .style("border-radius", "5px")
 
     // Add interactivity
-    svg.selectAll("circle")
+    svg.selectAll(".activeCircle")
       .on("mouseover", function(event, d) {
         d3.select(this).style("stroke-width", "4px");
         tooltip
