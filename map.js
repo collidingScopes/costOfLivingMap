@@ -2,18 +2,14 @@
 To-do:
 Allow user to choose benchmark country and adjust all indices based on that benchmark
 Add feature where the user can "query" and get back a table of data (countries with higher income than x, countries with lower COL than y, etc...)
+Add feature to compare one country against it's neighbors and get aggregate statistics
 Mobile formatting (smaller text size, etc.)
-Wrap text / smaller text on map info + legend
-Remove world map tiling (there is blank data once you leave original map)
-For full data table, add up+down arrow indicator to show that the column header can be clicked to be sorted
-Right-align the table data for readability
-Add every other row shading to full data table
-Add light shade fill for full data table when hovering on a row
-Add data sources, footnotes, table of data
-Audit data / double check against source
-Label for data not available
+Add flags in the header row for head-to-head comparison
+Label for countries with data not available on the map
 */
 
+let csvDataLink = "costOfLiving.csv";
+let geojsonDataLink = "countriesSimplified3.geojson";
 let geojsonData;
 let csvData;
 let map;
@@ -26,7 +22,7 @@ metricInput.addEventListener("change",toggleMap);
 let selectedMetric = String(metricInput.value);
 
 // Load GeoJSON
-fetch('countries.geojson')
+fetch(geojsonDataLink)
   .then(response => response.json())
   .then(data => {
     geojsonData = data;
@@ -38,7 +34,7 @@ fetch('countries.geojson')
   });
 
 // Load CSV
-fetch('costOfLiving.csv')
+fetch(csvDataLink)
   .then(response => response.text())
   .then(data => {
     csvData = d3.csvParse(data); // Using d3.js for CSV parsing
@@ -87,13 +83,13 @@ function createMap() {
   let title;
   let metricName;
   if(selectedMetric == "Cost of Living"){
-    title = `Cost of Living Index<br>(U.S.A. = 100)`;
+    title = `Cost of Living Index<br>(USA = 100)`;
     metricName = "costIndex";
   } else if(selectedMetric == "Income"){
-    title = `Income Index<br>(U.S.A. = 100)`;
+    title = `Income Index<br>(USA = 100)`;
     metricName = "incomeIndex";
   } else if(selectedMetric == "Purchasing Power"){
-    title = `Purchasing Power Index<br>(U.S.A. = 100)`;
+    title = `Purchasing Power Index<br>(USA = 100)`;
     metricName = "PPI";
   }
 
@@ -280,33 +276,37 @@ function createDataTable(){
     countryCell.textContent = item.Country;
 
     const costIndexCell = document.createElement('td');
+    costIndexCell.classList.add("right-align-cell");
     costIndexCell.textContent = item.costIndex;
 
     const incomeIndexCell = document.createElement('td');
+    incomeIndexCell.classList.add("right-align-cell");
     incomeIndexCell.textContent = item.incomeIndex;
 
     const PPICell = document.createElement('td');
+    PPICell.classList.add("right-align-cell");
     PPICell.textContent = item.PPI;
     
     const regionCell = document.createElement('td');
     regionCell.textContent = item.region;
 
     const populationCell = document.createElement('td');
+    populationCell.classList.add("right-align-cell");
     populationCell.textContent = Number(item.population).toLocaleString();
 
     row.appendChild(countryCell);
     row.appendChild(costIndexCell);
     row.appendChild(incomeIndexCell);
     row.appendChild(PPICell);
-    row.appendChild(regionCell);
     row.appendChild(populationCell);
+    row.appendChild(regionCell);
 
     tbody.appendChild(row);
   });
   table.appendChild(tbody);
 
   // Add table to the document
-  document.body.appendChild(table);
+  document.querySelector("#fullDataTableDiv").appendChild(table);
 
   sorttable.makeSortable(table);
 
@@ -384,7 +384,7 @@ function createCountryComparison(){
 
   function displayCountryDelta(){
     let costDelta = Number(document.querySelector("#costACell").textContent) / Number(document.querySelector("#costBCell").textContent) - 1;
-    let costDeltaMessage;
+    let costDeltaMessage = "";
     if(costDelta > 0){
       costDeltaMessage = "<b>Cost of living</b> in "+countryA+" is <span class='positiveDelta'>"+percentFormatting(Math.abs(costDelta))+" higher</span> than in "+countryB;
     } else if (costDelta < 0){
@@ -393,7 +393,7 @@ function createCountryComparison(){
     document.querySelector("#costDeltaCell").innerHTML = costDeltaMessage;
 
     let incomeDelta = Number(document.querySelector("#incomeACell").textContent) / Number(document.querySelector("#incomeBCell").textContent) - 1;
-    let incomeDeltaMessage;
+    let incomeDeltaMessage = "";
     if(incomeDelta > 0){
       incomeDeltaMessage = "<b>Income</b> in "+countryA+" is <span class='positiveDelta'>"+percentFormatting(Math.abs(incomeDelta))+" higher</span> than in "+countryB;
     } else if (incomeDelta < 0){
@@ -402,26 +402,27 @@ function createCountryComparison(){
     document.querySelector("#incomeDeltaCell").innerHTML = incomeDeltaMessage;
 
     let PPIDelta = Number(document.querySelector("#PPIACell").textContent) / Number(document.querySelector("#PPIBCell").textContent) - 1;
-    let PPIDeltaMessage;
+    let PPIDeltaMessage = "";
+    let comparisonResultMessage = "";
     if(PPIDelta > 0){
       PPIDeltaMessage = "<b>Purchasing power</b> in "+countryA+" is <span class='positiveDelta'>"+percentFormatting(Math.abs(PPIDelta))+" higher</span> than in "+countryB;
+      comparisonResultMessage = "Result: On average, <span class='positiveDelta'>people in "+countryA+" are "+percentFormatting(Math.abs(PPIDelta))+" wealthier</span> than people in "+countryB+", considering average income and average cost of living.";
     } else if (PPIDelta < 0){
       PPIDeltaMessage = "<b>Purchasing power</b> in "+countryA+" is <span class='negativeDelta'>"+percentFormatting(Math.abs(PPIDelta))+" lower</span> than in "+countryB;
+      comparisonResultMessage = "Result: On average, <span class='negativeDelta'>people in "+countryA+" are "+percentFormatting(Math.abs(PPIDelta))+" poorer</span> than people in "+countryB+", considering average income and average cost of living.";
     }
     document.querySelector("#PPIDeltaCell").innerHTML = PPIDeltaMessage;  
+    document.querySelector("#comparisonResult").innerHTML = comparisonResultMessage;  
   }
 
 }
 
 function createScatterplot(){
 
-  // Sort the data by population from high to low, so that largest circles are drawn first
-  csvData.sort((a, b) => b.population - a.population);
-
   // Set up the dimensions and margins of the graph
   const margin = {top: 45, right: 10, bottom: 45, left: 45};
-  const width = window.innerWidth*0.95 - margin.left - margin.right;
-  const height = Math.min(window.innerHeight*0.8, width) - margin.top - margin.bottom;
+  const width = Math.min(window.innerWidth*0.95,1000)- margin.left - margin.right;
+  const height = Math.min(window.innerHeight*0.85, 1000) - margin.top - margin.bottom;
 
   // Create SVG element
   const svg = d3.select("#scatterplot")
@@ -431,7 +432,7 @@ function createScatterplot(){
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // Read the CSV file
-  d3.csv("costOfLiving.csv").then(function(data) {
+  d3.csv(csvDataLink).then(function(data) {
   // Convert string values to numbers
     data.forEach(d => {
       d.costIndex = +d.costIndex;
@@ -442,17 +443,17 @@ function createScatterplot(){
 
     // Create scales
     const x = d3.scaleLinear()
-      .domain([0, 150])
+      .domain([0, 170])
       .range([0, width]);
 
     const y = d3.scaleLinear()
-      .domain([0, 170])
+      .domain([0, 150])
       .range([height, 0]);
 
     const size = d3.scaleLinear()
       //.domain([0, d3.max(data, d => d.population)])
       .domain([0,1200000000])
-      .range([6, 40]);  // Adjust min and max circle sizes as needed
+      .range([7, 7+Math.min(width,height)*0.06]);  // Adjust min and max circle sizes as needed
 
     // Add X gridlines
     svg.append("g")
@@ -492,7 +493,7 @@ function createScatterplot(){
       .style("text-anchor", "middle")
       .style("font-weight","bold")
       .style("font-size","14px")
-      .text("Cost of Living Index");
+      .text("Income Index");
 
     svg.append("g")
       .call(d3.axisLeft(y))
@@ -504,7 +505,7 @@ function createScatterplot(){
       .style("text-anchor", "middle")
       .style("font-weight","bold")
       .style("font-size","14px")
-      .text("Income Index");
+      .text("Cost of Living Index");
     
     // Handmade legend
 
@@ -516,55 +517,32 @@ function createScatterplot(){
     ];
     let regionColors = 
     [
-      "hsl(0,90%,50%)","hsl(45,90%,50%)",
-      "hsl(90,90%,50%)","hsl(135,90%,50%)",
-      "hsl(180,90%,50%)","hsl(225,90%,50%)",
-      "hsl(270,90%,50%)","hsl(315,90%,50%)",
+      "#ffd700",
+      "#ffb14e",
+      "#fa8775",
+      "#ea5f94",
+      "#cd34b5",
+      "#9d02d7",
+      "#0000ff",
+      "#000000"
     ];
 
     svg.append('rect')
-        .attr('x', 15)
-        .attr('y', 15)
+        .attr('x', 5)
+        .attr('y', 5)
         .attr('width', 190)
         .attr('height', 135)
         .attr('class', 'legendBox')
 
     for(i=0; i<regionLabels.length; i++){
-      svg.append("circle").attr("cx",30).attr("cy",30+15*i).attr("r", 6).style("fill", regionColors[i]);
-      svg.append("text").attr("x", 40).attr("y", 32+15*i).text(regionLabels[i]).style("font-size", "12px").attr("alignment-baseline","middle").attr("class","legendLabel");
+      svg.append("circle").attr("cx",20).attr("cy",20+15*i).attr("r", 5).style("fill", regionColors[i]);
+      svg.append("text").attr("x", 30).attr("y", 22+15*i).text(regionLabels[i]).style("font-size", "12px").attr("alignment-baseline","middle").attr("class","legendLabel");
     }
-
-    // Add dots
-    svg.selectAll(".activeCircle")
-      .data(data)
-      .enter()
-      .append("circle")
-        .attr("cx", d => x(d.costIndex))
-        .attr("cy", d => y(d.incomeIndex))
-        .attr("r", d => size(d.population))
-        //.style("fill", "#69b3a2")
-        .style("fill",function(d){
-          let selectedColor = 
-          (d.region == regionLabels[0]) ? regionColors[0] :
-          (d.region == regionLabels[1]) ? regionColors[1] :
-          (d.region == regionLabels[2]) ? regionColors[2] :
-          (d.region == regionLabels[3]) ? regionColors[3] :
-          (d.region == regionLabels[4]) ? regionColors[4] :
-          (d.region == regionLabels[5]) ? regionColors[5] :
-          (d.region == regionLabels[6]) ? regionColors[6] :
-          (d.region == regionLabels[7]) ? regionColors[7] :
-          "black";
-
-          return selectedColor;
-        })
-        .style("opacity", 0.85)
-        .attr("stroke", "black")
-        .attr("class","activeCircle");
 
     // Calculate linear regression
     const regression = d3.regressionLinear()
-      .x(d => d.costIndex)
-      .y(d => d.incomeIndex);
+      .x(d => d.incomeIndex)
+      .y(d => d.costIndex);
 
     const regressionLine = regression(data);
 
@@ -584,17 +562,43 @@ function createScatterplot(){
     const rSquared = Math.round(regressionLine.rSquared*1000)/1000;
 
     svg.append("text")
-      .attr("x", width-100)
-      .attr("y", height-30)
+      .attr("x", width-90)
+      .attr("y", height-25)
       .attr("text-anchor", "start")
       .style("font-size", "12px")
-      .style("font-weight","bold")
+      .style("font-style","italic")
       .style("fill", "black")
       .text(`y = ${slope}x + ${intercept}`)
       .append("tspan")
-      .attr("x", width-100)
+      .attr("x", width-90)
       .attr("dy", "1.2em")
       .text(`R² = ${rSquared}`);
+
+    // Add dots
+    svg.selectAll(".activeCircle")
+    .data(data)
+    .enter()
+    .append("circle")
+      .attr("cx", d => x(d.incomeIndex))
+      .attr("cy", d => y(d.costIndex))
+      .attr("r", d => size(d.population))
+      //.style("fill", "#69b3a2")
+      .style("fill",function(d){
+        let selectedColor = 
+        (d.region == regionLabels[0]) ? regionColors[0] :
+        (d.region == regionLabels[1]) ? regionColors[1] :
+        (d.region == regionLabels[2]) ? regionColors[2] :
+        (d.region == regionLabels[3]) ? regionColors[3] :
+        (d.region == regionLabels[4]) ? regionColors[4] :
+        (d.region == regionLabels[5]) ? regionColors[5] :
+        (d.region == regionLabels[6]) ? regionColors[6] :
+        (d.region == regionLabels[7]) ? regionColors[7] :
+        "black";
+        return selectedColor;
+      })
+      .style("opacity", 0.9)
+      .attr("stroke", "black")
+      .attr("class","activeCircle");
 
     // Add tooltip
     const tooltip = d3.select("body").append("div")
@@ -611,20 +615,70 @@ function createScatterplot(){
       .on("mouseover", function(event, d) {
         d3.select(this).style("stroke-width", "4px");
         tooltip
-          .style("font-size", "12px")
+          .style("font-size", "11px")
           .style("padding", "5px")
           .style("opacity", .9);
-        tooltip.html(`<b>${d.Country}</b><br/>Cost Index: ${d.costIndex}<br/>Income Index: ${d.incomeIndex}<br/>Purchasing Power Index: ${d.PPI}<br/>Population: ${d3.format(",")(d.population)}`)
+        tooltip
+          .html(`
+            <b>${d.Country}</b>
+            <table>
+              <tr>
+                <td>Cost Index</td>
+                <td>${d.costIndex}</td>
+              </tr>
+              <tr>
+                <td>Income Index</td>
+                <td>${d.incomeIndex}</td>
+              </tr>
+              <tr>
+                <td>Purchasing Power</td>
+                <td>${d.PPI}</td>
+              </tr>
+              <tr>
+                <td>Population</td>
+                <td>${Number(d.population).toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td>Region</td>
+                <td>${d.region}</td>
+              </tr>                                                        
+            </table>
+          `)
           .style("left", (event.pageX + 15) + "px")
           .style("top", (event.pageY - 40) + "px");
       })
       .on("click", function(event, d) {
         d3.select(this).style("stroke-width", "4px");
         tooltip
-          .style("font-size", "12px")
+          .style("font-size", "11px")
           .style("padding", "5px")
           .style("opacity", .9);
-        tooltip.html(`<b>${d.Country}</b><br/>Cost Index: ${d.costIndex}<br/>Income Index: ${d.incomeIndex}<br/>Purchasing Power Index: ${d.PPI}<br/>Population: ${d3.format(",")(d.population)}`)
+          tooltip
+          .html(`
+            <b>${d.Country}</b>
+            <table>
+              <tr>
+                <td>Cost Index</td>
+                <td>${d.costIndex}</td>
+              </tr>
+              <tr>
+                <td>Income Index</td>
+                <td>${d.incomeIndex}</td>
+              </tr>
+              <tr>
+                <td>Purchasing Power</td>
+                <td>${d.PPI}</td>
+              </tr>
+              <tr>
+                <td>Population</td>
+                <td>${Number(d.population).toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td>Region</td>
+                <td>${d.region}</td>
+              </tr>                                                        
+            </table>
+          `)
           .style("left", (event.pageX + 15) + "px")
           .style("top", (event.pageY - 40) + "px");
       })
@@ -645,11 +699,11 @@ function createScatterplot(){
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "bold")
-      .text("Global Cost of Living vs. Incomes")
+      .text("Global Income vs. Cost of Living")
       .append("tspan")
       .attr("x", width / 2)
       .attr("dy", "1.2em")
-      .text(`(Indexed values where U.S.A. = 100, as of 2023)`)
+      .text(`(Indexed values where USA = 100, as of 2023)`)
       .style("font-weight","normal")
       .style("font-size","16px");
 

@@ -13,9 +13,24 @@
   <title>Global Cost of Living</title>
 </head>
 <body>
-  <h1>Global Income, Cost of Living, and Purchasing Power</h1>
+  <h1>Mapping Global Income, Cost of Living, and Purchasing Power</h1>
+  <p class="firstPara">In this post, we'll walk through a map of global wealth -- with data on incomes, cost of living, and purchasing power across 110 countries.</p>
+  <p>The data is visualized below in three ways: a geographic map, scatterplot chart, and a tool to compare countries head-to-head.</p>
+  <p>Using this data, we can answer questions such as:</p>
+  <ul>
+    <li>Which countries have the highest and lowest incomes in the world?</li>
+    <li>What is the average cost of living in my country, and how does that compare to nearby countries?</li>
+    <li>If we adjust a country's average income by the average cost of living, which countries are richer and poorer?</li>
+  </ul>
 
-  <h2>Map</h2>
+  <p>The data is sourced from <a href="https://www.worlddata.info/cost-of-living.php" target="_blank" rel="noopener">WorldData.info</a> based on the year of 2023.</p>
+  <p>All data is shown as a relative index, where the value for the United States equals 100. An index value of 120 means "20% higher than USA", while an index value of 75 means "25% lower than USA".</p>
+
+  &nbsp;
+  <h2>Map of Global Wealth (Income, Cost of Living, and Purchasing Power)</h2>
+  <p>Use the map below to explore data across the globe. You can scroll and zoom to see more countries.</p>
+  <p>Hover/click on any country for more info.</p>
+  <p>The drop-down menu lets you choose between analysing cost of living, income, or purchasing power [1]. Countries are color-coded based on their index value (brighter colors = higher values).</p>
   <div id="metricInputDiv">
     <label for="metricInput" id="metricInputLabel">Metric:</label>
     <select id="metricInput" class="custom-select">
@@ -26,11 +41,20 @@
   </div>
 
   <div id="map"></div>
+  &nbsp;
+  <p>Note [1]: "Purchasing Power" is a metric that takes into consideration both income and cost of living, to determine whether one country is richer/better off than another country.</p>
+  <p>For example, average income in Switzerland is 19% higher than average income in the USA. However, cost of living is 26% higher in Switzerland. Therefore, on a purchasing power basis, people in Switzerland are ~6% poorer (they can buy less goods and/or save less than the average American).</p>
+  &nbsp;
 
-  <h2>Scatterplot</h2>
+  <h2>Scatterplot Chart -- Income versus Cost of Living by Country</h2>
+  <p>The scatterplot chart below compares incomes against cost of living for all 110 countries in the dataset. Each country is represented as a dot, where the dot is color-coded by world region and sized based on population.</p>
+  <p>Hover/click on any dot for more info.</p>
   <svg id="scatterplot"></svg>
+  &nbsp;
 
-  <h2>Head-to-Head Comparison</h2>
+  <h2>Head-to-Head Country Comparison</h2>
+  <p>Select any two countries below, and the table will provide a head-to-head comparison of the income, cost of living, and purchasing power in those countries.</p>
+  <p class="footnote">Note: these are relative index values as of 2023, where USA = 100</p>
   <table id="countryComparisonTable">
 
     <tr>
@@ -49,29 +73,50 @@
 
     <tr>
       <td>Cost of Living</td>
-      <td id="costACell"></td>
-      <td id="costBCell"></td>
+      <td id="costACell" class="right-align-cell"></td>
+      <td id="costBCell" class="right-align-cell"></td>
       <td id="costDeltaCell"></td>
     </tr>
 
     <tr>
       <td>Income</td>
-      <td id="incomeACell"></td>
-      <td id="incomeBCell"></td>
+      <td id="incomeACell" class="right-align-cell"></td>
+      <td id="incomeBCell" class="right-align-cell"></td>
       <td id="incomeDeltaCell"></td>
     </tr>
 
     <tr>
       <td>Purchasing Power</td>
-      <td id="PPIACell"></td>
-      <td id="PPIBCell"></td>
+      <td id="PPIACell" class="right-align-cell"></td>
+      <td id="PPIBCell" class="right-align-cell"></td>
       <td id="PPIDeltaCell"></td>
     </tr>
 
   </table>
 
-  <h2>Full Data Table</h2>
+  <div id="comparisonResultDiv">
+    <span id="comparisonResult"></span>
+  </div>
 
+  &nbsp;
+  <h2>Full Data Table</h2>
+  <p>The full dataset is presented below. Click on any of the column headers to sort by ascending or descending order.</p>
+  <p class="footnote">Note: these are relative index values as of 2023, where USA = 100</p>
+  <div id="fullDataTableDiv"></div>
+  &nbsp;
+
+  <h2>Sources, Notes, and Closing Remarks</h2>
+  <p>The data is sourced from <a href="https://www.worlddata.info/cost-of-living.php" target="_blank" rel="noopener">WorldData.info</a> based on the year of 2023. This has been compiled based on data from the OECD, World Bank, IMF, and Eurostat.</p>
+  <p>Mapping was done using the leaflet.js library, together with mapping tiles from OpenStreetMap.</p>
+  <p>The scatterplot chart was created using the d3.js data visualization library.</p>
+  <p>If you liked this post, you may be interested in some of my other tools and data essays:</p>
+  <ul>
+    <li><a href="https://themeasureofaplan.com/tools/" rel="noopener" target="_blank">Free spreadsheets and tools for budgeting, investment portfolio tracking, and more</a></li>
+    <li><a href="https://themeasureofaplan.com/investment-returns-by-asset-class/" rel="noopener" target="_blank">Investment returns by asset class (1985 to 2024)</a></li>
+    <li><a href="https://themeasureofaplan.com/us-stock-market-returns-1870s-to-present/" rel="noopener" target="_blank">US stock market returns -- a history from the 1870s to 2023</a></li>
+  </ul>
+
+  <p>That's all for now! Thanks for joining me on this data deep dive 🧐. Feel free to drop any comments or questions below.</p>
 
 </body>
 <script src="sorttable.js"></script>
