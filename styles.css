@@ -204,6 +204,24 @@ table.sortable thead {
   font-size: 1em;
 }
 
+.lowPurchasingPowerLabel{
+  fill: rgb(225, 5, 5);
+  opacity: 0.1;
+}
+
+.highPurchasingPowerLabel{
+  fill: rgb(4, 53, 225);
+  opacity: 0.1;
+}
+
+.purchasingPowerBoxLabel {
+  font-size: 10px;
+  font-style: italic;
+  font-weight: bold;
+  fill: navy;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 @media screen and (max-width: 600px) {
   .info {
     font-size: 12px;

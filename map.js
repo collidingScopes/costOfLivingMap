@@ -3,11 +3,13 @@ To-do:
 Allow user to choose benchmark country and adjust all indices based on that benchmark
 Add feature where the user can "query" and get back a table of data (countries with higher income than x, countries with lower COL than y, etc...)
 Add feature to compare one country against it's neighbors and get aggregate statistics
-Mobile formatting (smaller text size, etc.)
+Consider adding toggle for log scale for the scatterplot
 Add flags in the header row for head-to-head comparison
 Label for countries with data not available on the map
 */
 
+// let csvDataLink = "https://themeasureofaplan.com/wp-content/uploads/2024/10/costOfLiving.csv";
+// let geojsonDataLink = "https://themeasureofaplan.com/wp-content/uploads/2024/10/countriesSimplified3.geojson";
 let csvDataLink = "costOfLiving.csv";
 let geojsonDataLink = "countriesSimplified3.geojson";
 let geojsonData;
@@ -38,7 +40,7 @@ fetch(csvDataLink)
   .then(response => response.text())
   .then(data => {
     csvData = d3.csvParse(data); // Using d3.js for CSV parsing
-    console.log(csvData);
+    //console.log(csvData);
 
     if (geojsonData && csvData) {
       // Both datasets are loaded, proceed with map creation
@@ -59,7 +61,7 @@ function joinDataAndCreateMap() {
       feature.properties.costIndex = +Number(countryData['costIndex']);
       feature.properties.incomeIndex = +Number(countryData['incomeIndex']);
       feature.properties.PPI = +Number(countryData['PPI']);
-      console.log("Match found!");
+      //console.log("Match found!");
       // console.log(countryName + ": "+countryData['costIndex']);
     }
   });
@@ -421,8 +423,8 @@ function createScatterplot(){
 
   // Set up the dimensions and margins of the graph
   const margin = {top: 45, right: 10, bottom: 45, left: 45};
-  const width = Math.min(window.innerWidth*0.95,1000)- margin.left - margin.right;
-  const height = Math.min(window.innerHeight*0.85, 1000) - margin.top - margin.bottom;
+  let width = Math.min(window.innerWidth*0.95,1000)- margin.left - margin.right;
+  let height = Math.min(window.innerHeight*0.95, 1000) - margin.top - margin.bottom;
 
   // Create SVG element
   const svg = d3.select("#scatterplot")
@@ -442,18 +444,26 @@ function createScatterplot(){
     });
 
     // Create scales
+    let maxCostIndex = d3.max(data, d => d.costIndex);
+    let maxIncomeIndex = d3.max(data, function(d){
+      return d.incomeIndex;
+    });
+    //console.log("Max values: "+maxCostIndex+", "+maxIncomeIndex);
+    let roundedMaxValue = Math.ceil(Math.max(maxCostIndex, maxIncomeIndex) / 10)*10; //round up to nearest 10
+    //console.log("roundedMaxValue: "+roundedMaxValue);
+
     const x = d3.scaleLinear()
-      .domain([0, 170])
+      .domain([0, roundedMaxValue])
       .range([0, width]);
 
     const y = d3.scaleLinear()
-      .domain([0, 150])
+      .domain([0, roundedMaxValue])
       .range([height, 0]);
 
     const size = d3.scaleLinear()
       //.domain([0, d3.max(data, d => d.population)])
-      .domain([0,1200000000])
-      .range([7, 7+Math.min(width,height)*0.06]);  // Adjust min and max circle sizes as needed
+      .domain([0,Math.sqrt(1400000000)])
+      .range([4, 4+Math.min(width,height)*0.06]);  // Adjust min and max circle sizes as needed
 
     // Add X gridlines
     svg.append("g")
@@ -493,7 +503,8 @@ function createScatterplot(){
       .style("text-anchor", "middle")
       .style("font-weight","bold")
       .style("font-size","14px")
-      .text("Income Index");
+      .text("Income Index")
+      .attr("class","xAxis");
 
     svg.append("g")
       .call(d3.axisLeft(y))
@@ -505,7 +516,8 @@ function createScatterplot(){
       .style("text-anchor", "middle")
       .style("font-weight","bold")
       .style("font-size","14px")
-      .text("Cost of Living Index");
+      .text("Cost of Living Index")
+      .attr("class","yAxis");
     
     // Handmade legend
 
@@ -535,9 +547,54 @@ function createScatterplot(){
         .attr('class', 'legendBox')
 
     for(i=0; i<regionLabels.length; i++){
-      svg.append("circle").attr("cx",20).attr("cy",20+15*i).attr("r", 5).style("fill", regionColors[i]);
-      svg.append("text").attr("x", 30).attr("y", 22+15*i).text(regionLabels[i]).style("font-size", "12px").attr("alignment-baseline","middle").attr("class","legendLabel");
+      svg.append("circle").attr("cx",15).attr("cy",15+15*i).attr("r", 5).style("fill", regionColors[i]);
+      svg.append("text").attr("x", 25).attr("y", 17+15*i).text(regionLabels[i]).style("font-size", "12px").attr("alignment-baseline","middle").attr("class","legendLabel");
     }
+
+    //Add box labels for low / high purchasing power countries
+    svg.append('rect')
+      .attr('x', x(18))
+      .attr('y', y(93))
+      .attr('width', 100)
+      .attr('height', 30)
+      .attr('class', 'lowPurchasingPowerLabel');
+    svg.append("text")
+      .attr("x", x(20))
+      .attr("y", y(90.5))
+      .attr("alignment-baseline","middle")
+      .attr("class","purchasingPowerBoxLabel")
+      .text("Low purchasing")
+      .append("tspan")
+      .attr("x", x(20))
+      .attr("dy", "1.2em")
+      .text("power countries")
+
+    svg.append('rect')
+      .attr('x', x(100))
+      .attr('y', y(70))
+      .attr('width', 100)
+      .attr('height', 30)
+      .attr('class', 'highPurchasingPowerLabel');
+    svg.append("text")
+      .attr("x", x(102))
+      .attr("y", y(67.5))
+      .attr("alignment-baseline","middle")
+      .attr("class","purchasingPowerBoxLabel")
+      .text("High purchasing")
+      .append("tspan")
+      .attr("x", x(102))
+      .attr("dy", "1.2em")
+      .text("power countries")
+    
+    //Add X=Y dividing line
+    svg.append("line")
+      .attr("x1", x(0))
+      .attr("y1", y(0))
+      .attr("x2", x(roundedMaxValue))
+      .attr("y2", y(roundedMaxValue))
+      .attr("stroke", "#666666")
+      .attr("stroke-dasharray", "10,4")
+      .attr("stroke-width", 1);
 
     // Calculate linear regression
     const regression = d3.regressionLinear()
@@ -552,8 +609,8 @@ function createScatterplot(){
       .attr("y1", y(regressionLine[0][1]))
       .attr("x2", x(regressionLine[1][0]))
       .attr("y2", y(regressionLine[1][1]))
-      .attr("stroke", "black")
-      .attr("stroke-dasharray", "2,2")
+      .attr("stroke", "#c25b0b")
+      .attr("stroke-dasharray", "10,4")
       .attr("stroke-width", 2);
 
     // Add regression formula
@@ -562,15 +619,19 @@ function createScatterplot(){
     const rSquared = Math.round(regressionLine.rSquared*1000)/1000;
 
     svg.append("text")
-      .attr("x", width-90)
-      .attr("y", height-25)
+      .attr("x", width-95)
+      .attr("y", height-40)
       .attr("text-anchor", "start")
       .style("font-size", "12px")
       .style("font-style","italic")
-      .style("fill", "black")
+      .style("fill", "#c25b0b")
+      .text("Line of Best Fit")
+      .append("tspan")
+      .attr("x", width-95)
+      .attr("dy", "1.2em")
       .text(`y = ${slope}x + ${intercept}`)
       .append("tspan")
-      .attr("x", width-90)
+      .attr("x", width-95)
       .attr("dy", "1.2em")
       .text(`R² = ${rSquared}`);
 
@@ -581,7 +642,7 @@ function createScatterplot(){
     .append("circle")
       .attr("cx", d => x(d.incomeIndex))
       .attr("cy", d => y(d.costIndex))
-      .attr("r", d => size(d.population))
+      .attr("r", d => size(Math.sqrt(d.population)))
       //.style("fill", "#69b3a2")
       .style("fill",function(d){
         let selectedColor = 
@@ -644,8 +705,20 @@ function createScatterplot(){
               </tr>                                                        
             </table>
           `)
-          .style("left", (event.pageX + 15) + "px")
-          .style("top", (event.pageY - 40) + "px");
+          .style("left", function(){
+            if(event.pageX > window.innerWidth*0.6){
+              return (event.pageX - Math.min(175,window.innerWidth*0.5)) + "px";
+            } else {
+              return (event.pageX + 15) + "px";
+            }
+          })
+          .style("top", function(){
+            if(event.pageX > window.innerWidth*0.6){
+              return (event.pageY + 10) + "px";
+            } else {
+              return (event.pageY - 40) + "px";
+            }
+          });
       })
       .on("click", function(event, d) {
         d3.select(this).style("stroke-width", "4px");
@@ -679,8 +752,20 @@ function createScatterplot(){
               </tr>                                                        
             </table>
           `)
-          .style("left", (event.pageX + 15) + "px")
-          .style("top", (event.pageY - 40) + "px");
+          .style("left", function(){
+            if(event.pageX > window.innerWidth*0.6){
+              return (event.pageX - Math.min(175,window.innerWidth*0.5)) + "px";
+            } else {
+              return (event.pageX + 15) + "px";
+            }
+          })
+          .style("top", function(){
+            if(event.pageX > window.innerWidth*0.6){
+              return (event.pageY + 10) + "px";
+            } else {
+              return (event.pageY - 40) + "px";
+            }
+          });
       })
       .on("mouseout", function(d) {
         d3.select(this).style("stroke-width", "1px");
@@ -697,7 +782,7 @@ function createScatterplot(){
       .attr("x", width / 2)
       .attr("y", -20)
       .attr("text-anchor", "middle")
-      .style("font-size", "18px")
+      .style("font-size", "20px")
       .style("font-weight", "bold")
       .text("Global Income vs. Cost of Living")
       .append("tspan")
@@ -705,7 +790,8 @@ function createScatterplot(){
       .attr("dy", "1.2em")
       .text(`(Indexed values where USA = 100, as of 2023)`)
       .style("font-weight","normal")
-      .style("font-size","16px");
+      .style("font-size","14px");
 
   });
+
 }
