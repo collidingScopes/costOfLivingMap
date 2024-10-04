@@ -212,6 +212,28 @@ table.sortable thead {
   color: rgb(11, 182, 194);
 }
 
+#shareLinkDiv {
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+  display: flex;
+  align-items: center;
+  max-width:350px;
+}
+
+#comparisonTableShareButton{
+  border-radius: 6px;
+  border: 2px solid rgb(184, 197, 255);
+  background-color:rgb(239, 242, 255);
+  cursor: pointer;
+  padding: 4px;
+  margin-right: 10px;
+  max-width: 100px;
+}
+
+#comparisonTableShareButton:hover {
+  background-color:rgb(184, 197, 255);
+}
+
 #scatterplot {
   background-color: rgb(255, 252, 244);
 }
@@ -269,5 +291,15 @@ table.sortable thead {
 
   #countryComparisonTable select {
     font-size: 0.9em;
+  }
+}
+
+/* Prevent zoom on text focus for iPhone */
+@media screen and (-webkit-min-device-pixel-ratio:0) { 
+  select:focus,
+  textarea:focus,
+  input:focus {
+    font-size: 16px;
+    background: #eee;
   }
 }

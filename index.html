@@ -20,7 +20,7 @@
   <ul>
     <li>Which countries have the highest and lowest incomes in the world?</li>
     <li>What is the average cost of living in my country, and how does that compare to nearby countries?</li>
-    <li>If we adjust a country's average income by the average cost of living, which countries are richer and poorer?</li>
+    <li>If we adjust a country's average income by the cost of living, which countries are richer and poorer?</li>
   </ul>
 
   <p>The data is sourced from <a href="https://www.worlddata.info/cost-of-living.php" target="_blank" rel="noopener">WorldData.info</a> based on the year of 2023.</p>
@@ -58,8 +58,9 @@
   <p>Median income would be a preferred metric to use for this. If you know of a reliable data source for median incomes across most countries in the world, please let me know and I will adjust accordingly. As it stands, this is the best data I was able to find.</p>
   &nbsp;
 
-  <h2>Head-to-Head Country Comparison</h2>
+  <h2 id="comparison">Head-to-Head Country Comparison</h2>
   <p>Select any two countries below, and the table will provide a head-to-head comparison of the income, cost of living, and purchasing power in those countries.</p>
+  <p>This table can be useful for getting a sense of the cost of living in another country, whether you're interested to visit for tourism or plan to make a longer-term move.</p>
   <p class="footnote">Note: these are relative index values as of 2023, where USA = 100</p>
   <table id="countryComparisonTable">
 
@@ -103,6 +104,15 @@
     </tr>
 
   </table>
+
+  <div id="shareLinkDiv">
+    <button id="comparisonTableShareButton">Copy shareable link</button>
+    <textarea id="comparisonTableShareLink" rows="5" cols="40"></textarea>
+  </div>
+
+  &nbsp;
+  <p>As a reminder, “purchasing power” is a metric that uses average income and average cost of living, to determine whether one country is wealthier / better off than another country.</p>
+  <p>Of course individual circumstances will vary, but this metric is useful as a directional sense of whether the citizens of one country can buy more goods / save more money, on a broad average basis.</p>
 
   &nbsp;
   <h2>Full Data Table</h2>

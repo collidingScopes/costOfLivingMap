@@ -22,6 +22,54 @@ const metricInput = document.querySelector("#metricInput");
 metricInput.addEventListener("change",toggleMap);
 let selectedMetric = String(metricInput.value);
 
+let countryA;
+let countryB;
+getURLParameters();
+
+function getURLParameters(){
+  const queryString = window.location.search;
+  console.log(queryString);
+  const urlParams = new URLSearchParams(queryString);
+  if(urlParams.has('countryA')){
+    countryA = urlParams.get('countryA')
+  } else {
+    countryA = "Canada";
+  }
+
+  if(urlParams.has('countryB')){
+    countryB = urlParams.get('countryB')
+  } else {
+    countryB = "France";
+  }
+
+  console.log("Country A: "+countryA);
+  console.log("Country B: "+countryB);
+}
+
+const comparisonTableShareButton = document.querySelector("#comparisonTableShareButton");
+comparisonTableShareButton.addEventListener("click",copyURL);
+const comparisonTableShareLink = document.querySelector("#comparisonTableShareLink");
+
+function generateURL(){
+  let myUrlWithParams = new URL(location.protocol + '//' + location.host + location.pathname);
+  myUrlWithParams.searchParams.append("countryA", countryA);
+  myUrlWithParams.searchParams.append("countryB", countryB);
+  let finalUrl = myUrlWithParams.href+"#comparison";
+  comparisonTableShareLink.textContent = finalUrl;
+}
+
+function copyURL(){
+  //copy to clipboard
+  comparisonTableShareLink.select();
+  comparisonTableShareLink.setSelectionRange(0, 99999); // For mobile devices
+  
+  // Copy the text inside the text field
+  navigator.clipboard.writeText(comparisonTableShareLink.value);
+  
+  // Alert the copied text
+  //alert("Copied the text: " + comparisonTableShareLink.value);
+}
+
 // Load GeoJSON
 fetch(geojsonDataLink)
   .then(response => response.json())
@@ -328,9 +376,6 @@ function createCountryComparison(){
   selectA.classList.add("selectA");
   selectB.classList.add("selectB");
 
-  let countryA;
-  let countryB;
-
   // Populate the select elements
   populateSelect(csvData);
   function populateSelect(countries) {
@@ -350,14 +395,13 @@ function createCountryComparison(){
   document.querySelector("#countryACell").appendChild(selectA);
   document.querySelector("#countryBCell").appendChild(selectB);
 
-  selectA.value = "Canada";
-  selectB.value = "France";
+  selectA.value = countryA
+  selectB.value = countryB;
 
   selectA.addEventListener("change",changeCountryA);
   selectB.addEventListener("change",changeCountryB);
 
   //flags
-
   const flagImageA = document.getElementById('flag-image-a');
   const flagImageB = document.getElementById('flag-image-b');
 
@@ -432,6 +476,8 @@ function createCountryComparison(){
     }
     document.querySelector("#PPIDeltaCell").innerHTML = PPIDeltaMessage;  
     document.querySelector("#comparisonResult").innerHTML = comparisonResultMessage;  
+  
+    generateURL();
   }
 
 }
