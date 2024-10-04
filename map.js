@@ -4,7 +4,6 @@ Allow user to choose benchmark country and adjust all indices based on that benc
 Add feature where the user can "query" and get back a table of data (countries with higher income than x, countries with lower COL than y, etc...)
 Add feature to compare one country against it's neighbors and get aggregate statistics
 Consider adding toggle for log scale for the scatterplot
-Add flags in the header row for head-to-head comparison
 Label for countries with data not available on the map
 */
 
@@ -357,6 +356,11 @@ function createCountryComparison(){
   selectA.addEventListener("change",changeCountryA);
   selectB.addEventListener("change",changeCountryB);
 
+  //flags
+
+  const flagImageA = document.getElementById('flag-image-a');
+  const flagImageB = document.getElementById('flag-image-b');
+
   changeCountryA();
   changeCountryB();
 
@@ -368,7 +372,14 @@ function createCountryComparison(){
       document.querySelector("#costACell").textContent = countryInfo.costIndex;
       document.querySelector("#incomeACell").textContent = countryInfo.incomeIndex;
       document.querySelector("#PPIACell").textContent = countryInfo.PPI;
+
       displayCountryDelta();
+
+      const countryCode = String(countryInfo.abbreviation).toLowerCase();
+      const flagUrl = `https://flagcdn.com/32x24/${countryCode}.png`;
+      flagImageA.src = flagUrl;
+      flagImageA.style.display = 'inline-block';
+
     }
   }
 
@@ -381,6 +392,12 @@ function createCountryComparison(){
       document.querySelector("#incomeBCell").textContent = countryInfo.incomeIndex;
       document.querySelector("#PPIBCell").textContent = countryInfo.PPI;
       displayCountryDelta();
+
+      const countryCode = String(countryInfo.abbreviation).toLowerCase();
+      const flagUrl = `https://flagcdn.com/32x24/${countryCode}.png`;
+      flagImageB.src = flagUrl;
+      flagImageB.style.display = 'inline-block';
+
     }
   }
 
@@ -408,10 +425,10 @@ function createCountryComparison(){
     let comparisonResultMessage = "";
     if(PPIDelta > 0){
       PPIDeltaMessage = "<b>Purchasing power</b> in "+countryA+" is <span class='positiveDelta'>"+percentFormatting(Math.abs(PPIDelta))+" higher</span> than in "+countryB;
-      comparisonResultMessage = "Result: On average, <span class='positiveDelta'>people in "+countryA+" are "+percentFormatting(Math.abs(PPIDelta))+" wealthier</span> than people in "+countryB+", considering average income and average cost of living.";
+      comparisonResultMessage = "Result: On average, <span class='positiveDelta'>people in "+countryA+" are "+percentFormatting(Math.abs(PPIDelta))+" wealthier</span> than people in "+countryB+", considering average income and cost of living.";
     } else if (PPIDelta < 0){
       PPIDeltaMessage = "<b>Purchasing power</b> in "+countryA+" is <span class='negativeDelta'>"+percentFormatting(Math.abs(PPIDelta))+" lower</span> than in "+countryB;
-      comparisonResultMessage = "Result: On average, <span class='negativeDelta'>people in "+countryA+" are "+percentFormatting(Math.abs(PPIDelta))+" poorer</span> than people in "+countryB+", considering average income and average cost of living.";
+      comparisonResultMessage = "Result: On average, <span class='negativeDelta'>people in "+countryA+" are "+percentFormatting(Math.abs(PPIDelta))+" poorer</span> than people in "+countryB+", considering average income and cost of living.";
     }
     document.querySelector("#PPIDeltaCell").innerHTML = PPIDeltaMessage;  
     document.querySelector("#comparisonResult").innerHTML = comparisonResultMessage;  

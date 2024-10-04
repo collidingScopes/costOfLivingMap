@@ -159,7 +159,23 @@ table.sortable thead {
 #countryComparisonTable, #fullDataTable {
   display: block;
   overflow-x: auto;
-  white-space: nowrap;
+  /* white-space: nowrap; */
+}
+
+#countryComparisonTable {
+  max-width: 95vw;
+  text-align: center;
+}
+
+#countryComparisonTable th {
+  font-weight: normal;
+  font-style: italic;
+}
+
+#countryComparisonTable td {
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+  line-height: 1em;
 }
 
 #countryComparisonTable select {
@@ -169,15 +185,21 @@ table.sortable thead {
   border: 2px solid navy;
   border-radius: 5px;
   cursor: pointer;
-  max-width: 25vw;
+  max-width: 20vw;
+}
+
+#comparisonResultCell {
+  border: 2px solid rgb(28, 19, 78);
+  background-color: rgb(249, 249, 255);
+  font-size: 1.05em;
+}
+
+.comparisonColumn {
+  max-width: 35vw;
+  overflow-x: auto;
 }
 
 #comparisonResult {
-  margin-top: 2vh;
-  margin-bottom: 2vh;
-  border: 2px solid rgb(26, 22, 52);
-  border-radius: 6px;
-  padding: 8px;
   display: block;
   text-align: center;
 }

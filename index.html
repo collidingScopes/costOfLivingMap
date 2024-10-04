@@ -65,9 +65,9 @@
 
     <tr>
       <th></th>
-      <th>A</th>
-      <th>B</th>
-      <th>A vs. B</th>
+      <th><img id="flag-image-a" src="" alt="Country flag" style="display: none;"> (A)</th>
+      <th><img id="flag-image-b" src="" alt="Country flag" style="display: none;"> (B)</th>
+      <th>(A vs. B)</th>
     </tr>
 
     <tr>
@@ -79,30 +79,30 @@
 
     <tr>
       <td>Cost of Living</td>
-      <td id="costACell" class="right-align-cell"></td>
-      <td id="costBCell" class="right-align-cell"></td>
-      <td id="costDeltaCell"></td>
+      <td id="costACell"></td>
+      <td id="costBCell"></td>
+      <td id="costDeltaCell"  class="comparisonColumn"></td>
     </tr>
 
     <tr>
       <td>Income</td>
-      <td id="incomeACell" class="right-align-cell"></td>
-      <td id="incomeBCell" class="right-align-cell"></td>
-      <td id="incomeDeltaCell"></td>
+      <td id="incomeACell"></td>
+      <td id="incomeBCell"></td>
+      <td id="incomeDeltaCell" class="comparisonColumn"></td>
     </tr>
 
     <tr>
       <td>Purchasing Power</td>
-      <td id="PPIACell" class="right-align-cell"></td>
-      <td id="PPIBCell" class="right-align-cell"></td>
-      <td id="PPIDeltaCell"></td>
+      <td id="PPIACell"></td>
+      <td id="PPIBCell"></td>
+      <td id="PPIDeltaCell" class="comparisonColumn"></td>
+    </tr>
+
+    <tr>
+      <td colspan="4" id="comparisonResultCell"><span id="comparisonResult"></span></td>
     </tr>
 
   </table>
-
-  <div id="comparisonResultDiv">
-    <span id="comparisonResult"></span>
-  </div>
 
   &nbsp;
   <h2>Full Data Table</h2>
